@@ -3,6 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --plave-blue: #00d4ff;
+  --plave-purple: #9d50bb;
+  --plave-dark: #0a0b1e; /* Un azul muy oscuro para el fondo */
+  --plave-bg: linear-gradient(135deg, #b2f5ea 0%, #fbb6ce 50%, #c3dafe 100%);
 }
 
 @theme inline {
@@ -20,7 +24,21 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--plave-bg);
+  background-attachment: fixed; /* Esto hace que el fondo no se mueva al hacer scroll */
+  background-size: cover;
+  min-height: 100vh;
+  color: #1e293b; /* Un gris muy oscuro para que el texto sea legible sobre colores claros */
+}
+
+/* Opcional: Personaliza la barra de scroll para que combine */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.2);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
 }
