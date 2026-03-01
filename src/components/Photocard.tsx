@@ -101,23 +101,26 @@ export const Photocard = ({
         ))}
       </div>
 
-      <div className="mt-3 px-1 space-y-0.5">
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex gap-1">
-            <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+      <div className="mt-3 px-1">
+        <div className="flex justify-between items-start gap-2 pt-1">
+          {/* Lado izquierdo: Contenedor de etiquetas que se envuelven */}
+          <div className="flex flex-wrap gap-1 flex-1">
+            <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">
               {name}
             </span>
-            <span className="text-[9px] font-bold text-slate-400 bg-green-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+            <span className="text-[9px] font-bold text-slate-600 bg-green-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">
               {type}
             </span>
             {store && (
-              <span className="text-[9px] font-bold text-slate-400 bg-purple-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+              <span className="text-[9px] font-bold text-slate-600 bg-purple-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">
                 {store}
               </span>
             )}
           </div>
+
+          {/* Lado derecho: Owned fijo */}
           {isCollected && (
-            <span className="text-[10px] font-black text-pink-500 italic">
+            <span className="text-[10px] font-black text-pink-500 italic shrink-0 pt-0.5">
               OWNED
             </span>
           )}

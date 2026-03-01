@@ -15,6 +15,7 @@ import {toggleCollection} from "@/actions/auth";
 import {Card} from "@/types/photocard.type";
 import Link from "next/link";
 import {generateCollectionPDF} from "@/lib/exportPdf";
+import Select from "react-select";
 
 interface Props {
   readonly initialCards: Card[];
@@ -116,6 +117,9 @@ export default function DashboardContent({initialCards, isAdmin}: Props) {
     statusFilter !== "All" ||
     eraFilter !== "All" ||
     searchQuery !== "";
+
+  const eraOptions = sortedEras.map((era) => ({value: era, label: era}));
+  eraOptions.unshift({value: "All", label: "All Eras"});
 
   return (
     <div className="p-6 max-w-7xl mx-auto relative">
@@ -222,18 +226,40 @@ export default function DashboardContent({initialCards, isAdmin}: Props) {
               <option value="Wishlist">Missing 💎</option>
             </select>
 
-            <select
-              value={eraFilter}
-              onChange={(e) => setEraFilter(e.target.value)}
-              className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 outline-none"
-            >
-              <option value="All">All</option>
-              {sortedEras.map((era) => (
-                <option key={era} value={era}>
-                  {era}
-                </option>
-              ))}
-            </select>
+            <div className="w-full md:w-60">
+              {" "}
+              {/* Contenedor para controlar el ancho */}
+              <Select
+                instanceId="era-select"
+                options={eraOptions}
+                defaultValue={eraOptions[0]}
+                onChange={(option) => setEraFilter(option?.value || "All")}
+                placeholder="Select Era..."
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    borderRadius: "0.75rem",
+                    padding: "2px",
+                    border: "1px solid #e2e8f0",
+                    fontSize: "0.75rem",
+                    fontWeight: "700",
+                    boxShadow: "none",
+                    "&:hover": {border: "1px solid #f9a8d4"},
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                      ? "#f472b6"
+                      : state.isFocused
+                        ? "#fdf2f8"
+                        : "white",
+                    color: state.isSelected ? "white" : "#475569",
+                    fontSize: "0.75rem",
+                    fontWeight: "600",
+                  }),
+                }}
+              />
+            </div>
 
             {hasFilters && (
               <button
