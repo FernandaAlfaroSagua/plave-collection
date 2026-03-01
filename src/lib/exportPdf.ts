@@ -105,7 +105,7 @@ export const generateCollectionPDF = async (
       const storeName =
         card.store === "Universal Music Store" ? "UMS" : card.store;
       doc.text(
-        `${storeName ? storeName + " (" + card.type + ")" : card.type}`,
+        `${storeName ? card.name + " (" + storeName + " - " + card.type + ")" : card.name + " (" + card.type + ")"}`,
         x + imgWidth / 2,
         rowY + imgHeight + 5,
         {
