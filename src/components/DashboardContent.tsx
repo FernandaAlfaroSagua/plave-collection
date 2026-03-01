@@ -15,6 +15,7 @@ import {toggleCollection} from "@/actions/auth";
 import {Card} from "@/types/photocard.type";
 import Link from "next/link";
 import {generateCollectionPDF} from "@/lib/exportPdf";
+import {EraMultiSelect} from "./EraMultiSelect";
 import Select from "react-select";
 
 interface Props {
@@ -30,6 +31,13 @@ export default function DashboardContent({initialCards, isAdmin}: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [loadingPDF, setLoadingPDF] = useState(false);
+  const [showPDFMenu, setShowPDFMenu] = useState<"owned" | "wishlist" | null>(
+    null,
+  );
+  const [selectedEras, setSelectedEras] = useState<
+    {value: string; label: string}[]
+  >([]);
+  const [allSelected, setAllSelected] = useState(false);
 
   // Estados para Navegación
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -119,7 +127,6 @@ export default function DashboardContent({initialCards, isAdmin}: Props) {
     searchQuery !== "";
 
   const eraOptions = sortedEras.map((era) => ({value: era, label: era}));
-  eraOptions.unshift({value: "All", label: "All Eras"});
 
   return (
     <div className="p-6 max-w-7xl mx-auto relative">
@@ -137,14 +144,9 @@ export default function DashboardContent({initialCards, isAdmin}: Props) {
         <div className="flex flex-wrap gap-3 items-center">
           <div className="flex gap-2">
             <button
-              onClick={async () => {
-                setLoadingPDF(true);
-                await generateCollectionPDF(
-                  cards.filter((c) => c.isCollected),
-                  "Mi Colección",
-                  "mi-coleccion",
-                );
-                setLoadingPDF(false);
+              onClick={() => {
+                setShowPDFMenu("owned");
+                setSelectedEras([]);
               }}
               disabled={loadingPDF}
               className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2 text-xs font-bold shadow-sm disabled:opacity-50"
@@ -155,14 +157,9 @@ export default function DashboardContent({initialCards, isAdmin}: Props) {
               OWNED
             </button>
             <button
-              onClick={async () => {
-                setLoadingPDF(true);
-                await generateCollectionPDF(
-                  cards.filter((c) => !c.isCollected),
-                  "Wishlist",
-                  "mi-wishlist",
-                );
-                setLoadingPDF(false);
+              onClick={() => {
+                setShowPDFMenu("wishlist");
+                setSelectedEras([]);
               }}
               disabled={loadingPDF}
               className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2 text-xs font-bold shadow-sm disabled:opacity-50"
@@ -172,6 +169,90 @@ export default function DashboardContent({initialCards, isAdmin}: Props) {
               />{" "}
               WISHLIST
             </button>
+            {/* MENÚ DE ERAS PARA PDF */}
+            <AnimatePresence>
+              {showPDFMenu && (
+                <motion.div
+                  initial={{opacity: 0, scale: 0.95, y: -10}}
+                  animate={{opacity: 1, scale: 1, y: 0}}
+                  exit={{opacity: 0, scale: 0.95, y: -10}}
+                  className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm"
+                >
+                  <div className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-6 min-w-[320px]">
+                    <h2 className="font-black text-slate-800 text-lg mb-2">
+                      Export PDF:{" "}
+                      {showPDFMenu === "owned" ? "OWNED" : "WISHLIST"}
+                    </h2>
+                    <EraMultiSelect
+                      options={[{value: "All", label: "All"}, ...eraOptions]}
+                      value={selectedEras}
+                      onChange={(vals) => {
+                        if (vals.some((v) => v.value === "All")) {
+                          setSelectedEras([{value: "All", label: "All"}]);
+                        } else {
+                          setSelectedEras(
+                            vals.filter((v) => v.value !== "All"),
+                          );
+                        }
+                      }}
+                      disabled={loadingPDF}
+                    />
+                    {/* Opciones de eras filtradas según OWNED/WISHLIST */}
+                    <div className="flex gap-3 mt-2">
+                      <button
+                        className="px-5 py-2 rounded-xl bg-pink-500 text-white font-bold shadow hover:bg-pink-600 transition-all"
+                        disabled={loadingPDF}
+                        onClick={async () => {
+                          setLoadingPDF(true);
+                          // Filtrar cards por eras seleccionadas
+                          let filtered: Card[];
+                          if (selectedEras.length === 0) {
+                            filtered = cards.filter((c) =>
+                              showPDFMenu === "owned"
+                                ? c.isCollected
+                                : !c.isCollected,
+                            );
+                          } else {
+                            const eraSet = new Set(
+                              selectedEras.map((e) => e.value),
+                            );
+                            filtered = cards.filter(
+                              (c) =>
+                                (showPDFMenu === "owned"
+                                  ? c.isCollected
+                                  : !c.isCollected) && eraSet.has(c.era),
+                            );
+                          }
+                          await generateCollectionPDF(
+                            filtered,
+                            showPDFMenu === "owned"
+                              ? "Mi Colección"
+                              : "Wishlist",
+                            showPDFMenu === "owned"
+                              ? "mi-coleccion"
+                              : "mi-wishlist",
+                          );
+                          setLoadingPDF(false);
+                          setShowPDFMenu(null);
+                        }}
+                      >
+                        Exportar
+                      </button>
+                      <button
+                        className="px-5 py-2 rounded-xl bg-slate-200 text-slate-700 font-bold shadow hover:bg-slate-300 transition-all"
+                        onClick={() => setShowPDFMenu(null)}
+                        disabled={loadingPDF}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2 text-center">
+                      Si no seleccionas ninguna era, se exportarán todas.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {isAdmin && (
