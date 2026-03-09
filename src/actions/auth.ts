@@ -51,7 +51,7 @@ export async function signup(formData: FormData) {
 
   if (error) return redirect("/register?message=error");
 
-  return redirect("/login?message=check-email");
+  return redirect("/dashboard");
 }
 
 export async function toggleCollection(photocardId: number) {
