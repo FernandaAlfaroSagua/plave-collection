@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PLAVE Collector - Asterum Connection",
-  description: "Gestiona tu colección de photocards de PLAVE",
+  description: "Manage your collection of PLAVE photocards",
 };
 
 export default function RootLayout({
