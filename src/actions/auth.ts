@@ -41,21 +41,33 @@ export async function signup(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const username = formData.get("username") as string;
-  const bias = formData.get("bias") as string; // <--- Nuevo campo
+  const bias = formData.get("bias") as string;
 
-  const {error} = await supabase.auth.signUp({
+  const {data, error} = await supabase.auth.signUp({
     email,
     password,
-    options: {data: {bias, username}},
+    options: {
+      data: {bias, username},
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+    },
   });
 
-  console.log("error", error);
+  // 1. Si hay un error REAL de Supabase, lo logueamos y redirigimos a error
+  if (error) {
+    console.error("Supabase Signup Error:", error.message);
+    return redirect("/register?message=error");
+  }
 
-  if (error) return redirect("/register?message=error");
+  // 2. Si el usuario se creó pero el login no es automático (a veces pasa en el primer sign up)
+  // podrías necesitar hacer un signIn justo después, pero intentemos el redirect primero:
 
-  return redirect("/dashboard");
+  if (data?.user) {
+    return redirect("/dashboard");
+  }
+
+  // Por si acaso cae en un limbo
+  return redirect("/login?message=check-account");
 }
-
 export async function toggleCollection(photocardId: number) {
   const supabase = await createClient();
   const {
