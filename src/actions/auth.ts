@@ -49,6 +49,8 @@ export async function signup(formData: FormData) {
     options: {data: {bias, username}},
   });
 
+  console.log("error", error);
+
   if (error) return redirect("/register?message=error");
 
   return redirect("/dashboard");
